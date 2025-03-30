@@ -1,21 +1,19 @@
-## 10-delegations-calculator
+## Delegations-calculator
 
-Należy zaimplementować kalkulator kwoty przysługującej za delegację pracowniczą: klasa `Calc`, metoda `calculate`.
+Implement a calculator for the amount owed for a business trip delegation: class `Calc`, method `calculate`.
 
-Dane testowe znajdują się w pliku `src/test/resources/delegations.csv`
+Test data can be found in the file `src/test/resources/delegations.csv`.
 
-Parametry:
-* start: początek delegacji, w formacie `yyyy-mm-dd HH:MM timezone`
-* end: koniec delegacji, w formacie `yyyy-mm-dd HH:MM timezone`
-* dailyRate: stawka dzienna za delegację.
+Parameters:
+* `start`: start of the delegation, in the format `yyyy-mm-dd HH:MM timezone`
+* `end`: end of the delegation, in the format `yyyy-mm-dd HH:MM timezone`
+* `dailyRate`: daily rate for the delegation.
 
-Dane testowe zawierają dodatkowo kolumnę expected, w której znajduje się oczekiwany wynik obliczeń.
+The test data also includes an `expected` column, which contains the expected result of the calculation.
 
-
-Zasady obliczania delegacji:
-* za pełną dobę - przysługuje pełna stawka dzienna,
-* do 8 godzin - przysługuje 1/3 stawki dziennej,
-* ponad 8 do 12 godzin - przysługuje 1/2 stawki dziennej,
-* ponad 12 godzin - przysługuje pełna stawka dzienna,
-* jeśli czas rozpoczęcia jest późniejszy lub taki sam jak czas końcowy, przysługuje 0.
-
+Delegation calculation rules:
+* For a full day (24 hours) - the full daily rate is owed.
+* For up to 8 hours - 1/3 of the daily rate is owed.
+* For more than 8 and up to 12 hours - 1/2 of the daily rate is owed.
+* For more than 12 hours - the full daily rate is owed.
+* If the start time is later than or equal to the end time, 0 is owed.
