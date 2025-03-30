@@ -1,34 +1,48 @@
-## Zadanie do wykładu 2: Arkusz Kalkulacyjny
+## Task for Lecture 2: Spreadsheet
 
-Zadanie polega na zaimplementowaniu obliczeń w prostym arkuszu kalkulacyjnym. Arkusz operuje tylko na liczbach całkowitych, w zakresie ograniczonym typem `int`.
+The task is to implement calculations for a simple spreadsheet.  
+The spreadsheet operates only on **integer numbers**, constrained by the `int` type.
 
-W klase `uj.wmii.pwj.spreadsheet.Spreadsheet` Należy zaimplementować metodę `calculate` tak, aby operując na źródłowym arkuszu (przekazanym w paramtrze) zwróciła arkusz wynikowy, z wykonanymi obliczeniami. Tablica wejściowa zawiera kolejno: wiersze i kolumny.
+In the class **`uj.wmii.pwj.spreadsheet.Spreadsheet`**,  
+the `calculate` method should be implemented to process the input spreadsheet  
+(provided as a parameter) and return a result spreadsheet with calculated values.  
+The input array contains **rows and columns** in sequential order.
 
-Arkusz powinien obsługiwać następujące operacje:
-- wartość: jeśli komórka zawiera liczbę, należy ją po prostu zostawić.
-- referencja: jeśli komórka zaczyna się od znaku `$`, zawiera referencję do innej komórki. Referencje są zbudowane podobnie jak w Excelu, np zapis: `$A1` oznacza pierwszą kolumnę (`A`), pierwszy wiersz (`1`). Zapis `$C7` oznacza trzecią kolumnę, pierwszy wiersz.
-- formuła: jeśli komórka zaczyna się od znaku `=`, zawiera formułę. Każda formuła składa się ze znaku `=`, nazwy formuły, oraz dwóch oddzielonych przecinkiem parametrów w zwykłych nawiasach. Parametrem formuły może być tylko wartość lub referencja (ale nie inna formuła).
+### Supported Operations:
+- **Value:** If a cell contains a number, it should remain unchanged.
+- **Reference:** If a cell starts with the `$` symbol, it refers to another cell.  
+  References are structured similarly to Excel:  
+  - `$A1` refers to **column A (1st column)** and **row 1**.  
+  - `$C7` refers to **column C (3rd column)** and **row 7**.
+- **Formula:** If a cell starts with the `=` symbol, it contains a formula.  
+  A formula consists of:
+  - `=` symbol.
+  - Formula name.
+  - Two comma-separated parameters enclosed in parentheses.  
+  Parameters can be either **values** or **references** (but not another formula).
 
-Istniejące formuły:
-- `ADD` - dodawanie obu parametrów,
-- `SUB` - odejmowanie parametrów,
-- `MUL` - mnożenie parametrów,
-- `DIV` - dzielenie całkowite parametrów,
-- `MOD` - reszta z dzielenia parametrów.
+### Available Formulas:
+- **`ADD`** - Adds both parameters.
+- **`SUB`** - Subtracts the second parameter from the first.
+- **`MUL`** - Multiplies both parameters.
+- **`DIV`** - Performs integer division.
+- **`MOD`** - Computes the remainder of integer division.
 
-Arkusz nie będzie zawierał referencji cyklicznych (np komórka `A1` odwołuje się do `B2`, a `B2` znów do `A1`).
+The spreadsheet will **not** contain circular references  
+(e.g., cell `A1` referring to `B2`, while `B2` refers back to `A1`).
 
-Przykład:
+### Example:
 
-Dla arkusza:
-```$xslt
+#### Input Spreadsheet:
+```xslt
 1,2,3
 4,5,6
 $A1,$C1,$B3
 =ADD(10,$A1),=SUB($C3,$A1),0
 ```
-Wynik powinien wyglądać:
-```$xslt
+
+### Expected Output:
+```xslt
 1,2,3
 4,5,6
 1,3,3
