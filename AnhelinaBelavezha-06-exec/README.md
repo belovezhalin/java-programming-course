@@ -1,10 +1,10 @@
-## Zadanie do wykładu 6 - Własna implementacja `ExecutorService`
+## Custom Implementation of `ExecutorService`
 
-Należy zaimplementować klasę `MyExecutorService` w taki sposób, aby realizowała API `ExecutorService`.
+The `MyExecutorService` class must be implemented to conform to the `ExecutorService` API.
 
-Implementacja może być oparta na jednym wątku (single thread executor). Nie należy używać istniejących implemetacji, należy oprzeć się tylko na niskopoziomowym API wątków! Można używać istniejących implementacji interfejsu `Future`, np `CompletableFuture`.
+The implementation can be based on a single-thread executor. Existing implementations should not be used; instead, the solution must rely solely on low-level thread APIs! However, existing implementations of the `Future` interface, such as `CompletableFuture`, may be used.
 
-Dodatkowo, należy dostarczyć testy, które przetestują wszystkie metody. Kilka przykładowych testów jest już zaimplementowanych w klasie `ExecServiceTest` - można się na nich wzorować.
+Additionally, tests must be provided to verify all methods. Several example tests are already implemented in the `ExecServiceTest` class, which can be used as a reference.
 
-### UWAGA
-W tym zadaniu nie wystarczy "przejść" pipeline'a - konieczna analiza kodu.
+### NOTE
+In this task, simply passing the pipeline is not enough—code analysis is required.
