@@ -1,63 +1,91 @@
-## Zadanie 1: Brainfuck interpreter
+# Project Tasks
 
-Należy zaimplementować interpreter języka Brainufck, zgodnie z definicją opisaną tutaj: https://en.wikipedia.org/wiki/Brainfuck.
+## Task 1: Brainfuck Interpreter
 
-Do testów jest używana metoda fabryczna `Brainfuck.createInstance(java.lang.String, java.io.PrintStream, java.io.InputStream, int)`. Do operacji wejścia-wyjścia nie należy używać bezpośrednio `System.in` lub `System.out`, lecz parametrów z metody, odpowiednio: `in` oraz `out`. 
+Implement an interpreter for the **Brainfuck** programming language according to the definition described here:  
+[Brainfuck on Wikipedia](https://en.wikipedia.org/wiki/Brainfuck).
 
-**UWAGA 1:** polska wersja wikipedii zawiera błąd w opisie rozkazów! Należy stosować się do wersji anglojęzycznej.
+The factory method **`Brainfuck.createInstance(String code, PrintStream out, InputStream in, int memorySize)`** is used for testing.  
+For input/output operations, **do not** use `System.in` or `System.out` directly. Instead, use the provided `in` and `out` parameters.
 
-**UWAGA 2:** specyfikacja języka nie definiuje części zachowań (np co jeśli wartość po zmniejszeniu spadnie poniżej 0). W takich wypadkach interpreter ma dowolność, testy nie obejmują tego typu nieokreślonych cech języka.
+### Important Notes:
+1. **The Polish Wikipedia page contains errors in the command descriptions!**  
+   Follow the English Wikipedia version.
+2. **Certain behaviors are undefined in the language specification**  
+   (e.g., what happens if a value goes below 0).  
+   The interpreter has flexibility in such cases, and tests will not cover these undefined behaviors.
 
-## Zadanie 2: zbudować kreator losowej planszy do gry w statki
+---
 
-Należy napisać kreator do losowania poprawnych plansz do gry w statki (zaimplementować `uj.wmii.pwj.collections.collections.BattleshipGenerator.generateMap`).
+## Task 2: Random Battleship Board Generator
 
-Metoda `defaultInstance` w interfejsie `BattleshipGenerator` jest fabryką - powinna zwracać instancję stworzonej klasy.
+Implement a generator to randomly create valid **Battleship** game boards.  
+The method to implement is:  
+**`uj.wmii.pwj.collections.collections.BattleshipGenerator.generateMap()`**.
 
-Plansza do gry w statki jest kwadratem 10x10 (API powinno zwracać `String` o rozmiarze 100. indeksy 0-9: pierwszy wiersz, 10-19 drugi wiersz, itd). Każde pole może zawierać element statku (maszt), oznaczony znakiem `*`, lub zawierać wodę oznaczoną przez `.`.
+The `defaultInstance` method in the `BattleshipGenerator` interface acts as a factory  
+and should return an instance of the implemented class.
 
-Statki mogą być 1, 2, 3, lub 4 masztowe. Statek to jedno, lub więcej stykających się bokiem, pole zawierające maszt. Maszty stykające się tylko rogami nie są statkiem.
+### Board Details:
+- The board is a **10x10 square grid**.
+- The API should return a **`String` of length 100**.  
+  - **Indices 0-9:** First row  
+  - **Indices 10-19:** Second row  
+  - And so on...
+- Each cell contains:
+  - **`*`** → Ship part (mast)
+  - **`.`** → Water
 
-Przykłady prawidłowych statków (w otoczeniu wody):
+### Ship Rules:
+- Ships can be **1, 2, 3, or 4** masts in size.
+- A ship consists of one or more adjacent `*` cells connected **horizontally or vertically**.
+- Ships **cannot** be connected diagonally.
+- **Valid ship count:**
+  - **4** single-mast ships  
+  - **3** two-mast ships  
+  - **2** three-mast ships  
+  - **1** four-mast ship  
+- **Ships must not touch each other, even diagonally.**  
+  There must be at least one empty cell between them.
+
+### Valid Ships (surrounded by water):
 ```
 ...
-.#.  -> jednomasztowiec
+.#.  -> Single-mast ship
 ...
 
 ......
-.##.#. -> dwa dwumasztowce
+.##.#. -> Two two-mast ships
 ....#.
 
 .....
-..#..  -> trójmasztowiec
+..#..  -> Three-mast ship
 .##..
 
 .........
 ......##.
-.####.##. -> dwa czteromasztowce
+.####.##. -> Two four-mast ships
 .........
 ```
 
-Przykłady nieprawidłowych statków:
+### Invalid Ships:
 ```
 ......
-..#...  -> nieprawidłowy dwumasztowiec
+..#...  -> Invalid two-mast ship (diagonal connection)
 ...#..
 ......
 .......
 ...#...
-..#.#..  -> nieprawidłowy czteromasztowiec
+..#.#..  -> Invalid four-mast ship (diagonal connection)
 ...#...
 ```
 
-Prawidłowa plansza zawiera: 4 jednomasztowce, 3 dwumasztowce, 2 trójmasztowce, oraz 1 czteromasztowiec. Pomiędzy statkami musi być przynajmniej jedno pole odstępu (statki nie mogą dotykać się rogami).
-
-Przykładowa prawidłowa plansza:
+### Example of a Valid Board:
 ```
 ..#.......#......#..#..#........##............##...##................#..##...#...##....#.#.......#..
 ```
 
-Ta sama plansza z dodatkowe znakami końca linii co 10 znaków dla czytelności:
+### For better readability, the board with **line breaks every 10 characters**:
 ```
 ..#.......
 #......#..
