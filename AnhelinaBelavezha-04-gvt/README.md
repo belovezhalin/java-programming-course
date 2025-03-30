@@ -1,103 +1,98 @@
-## Great Versioning Tool (gvt)
+## Great Versioning Tool (GVT)
 
-Należy napisać system kontroli wersji plików - (bardzo) uproszczony GIT.
+A simplified version control system for files, similar to a minimal GIT.
 
-System obsługuje tylko pliki. Nie obsługuje podkatalogów, i nie musi (ale może) obsługiwać linków.
+The system only supports files. It does not support subdirectories and does not have to (but may) support symbolic links.
 
-Podstawową jednostką działania są *wersje*. Każda *wersja* zawiera:
-- numer wersji (od `0` do `Integer.MAX_VALUE`);
-- wiadomość (commit message), który został dodany przy zatwierdzaniu (`commit`) wersji;
-- wszystkie pliki, które były dodane (komenda `add`) do gvt. Pliki zatwierdzone w konkretnej wersji nie mogą być w ramach tej wersji zmodyfikowane - zatwierdzenie ich modyfikacji oznacza utworzenie nowej wersji.
-- *ostatnia wersja* to wersja, która została utworzona ostatnio. Tworzyć nową wersję mogą komendy: `init` (tylko 0), `add`, `detach`, `commit`. UWAGA: Te komendy pracują zawsze na ostatniej wersji, nie na tej, która jest aktualnie pobrana. 
+### Versioning
+The core unit of operation is a *version*. Each *version* contains:
+- A version number (from `0` to `Integer.MAX_VALUE`)
+- A commit message added when committing (`commit`) a version
+- All files that were added (`add`) to GVT. Files committed in a specific version cannot be modified within that version—modifying them requires creating a new version.
+- The *latest version* is the most recently created version. New versions can be created by the following commands: `init` (only version 0), `add`, `detach`, and `commit`. **Note:** These commands always operate on the latest version, not necessarily the currently checked-out version.
 
-### Uruchomienie aplikacji
-- System powinien dostarczyć uruchamialną klasę `Gvt`. Klasa ta będzie używana do uruchomienia wszystkich komend.
-- Komenda zawsze będzie pierwszym parametrem uruchomienia programu.
-- W razie braku parametrów, program powinien wypisać na *System.out*: `Please specify command.`, oraz zwrócić kod błędu 1.
-- W razie podania nieznanej komendy, program powinien wypisać na *System.out*: `Unknown command {specifed-command}.`, oraz zwrócić kod błędu 1.
+### Running the Application
+- The system should provide an executable class `Gvt`. This class will be used to run all commands.
+- The command is always the first parameter when executing the program.
+- If no parameters are provided, the program should print to *System.out*: `Please specify command.` and return an error code `1`.
+- If an unknown command is provided, the program should print to *System.out*: `Unknown command {specified-command}.` and return an error code `1`.
 
-### Zasady ogólne
-- Wszystkie komendy (poza `init`) działają tylko w zainicjalizowanym katalogu. Jeżli bieżący katalog nie jest zainicjalizowany, wszystkie pozostałe komendy powinny wypisać na *System.out* komunikat: `Current directory is not initialized. Please use "init" command to initialize.`, oraz zwrócić kod błędu -2. Ten błąd ma pierwszeństwo przed wszystkimi innymi (np brak pliku, który chcemy dodać).
-- Jeśli nie podano inaczej, to w razie wystąpienia błędu systemu operacyjnego (np. brak miejsca na dysku, brak praw do zapisu) należy wypisać na *System.out*: `Underlying system problem. See ERR for details.`, zwrócić kod błędu -3, oraz wypisać na *System.err* stack trace.
+### General Rules
+- All commands (except `init`) operate only in an initialized directory. If the current directory is not initialized, all other commands should print to *System.out*: `Current directory is not initialized. Please use "init" command to initialize.`, and return an error code `-2`. This error takes precedence over all others (e.g., missing file to add).
+- Unless otherwise specified, if an OS-related error occurs (e.g., insufficient disk space, lack of write permissions), the program should print to *System.out*: `Underlying system problem. See ERR for details.`, return an error code `-3`, and print the stack trace to *System.err*.
 
-### Zasady dla komend: add, detach, commit
-- posiadają opcjonalny parametr, `-m {"Treść wiadomości w cudzysłowiu}"`, który może byc podany jako ostatni parametr. Jest to *wiadomość użytkownika*. Należy ją dokleić do *domyślnej wiadmości*; razem utworzą wiadomość wersji.
+### Rules for `add`, `detach`, `commit` Commands
+- They have an optional parameter: `-m {"Message in quotes"}` that can be provided as the last parameter. This is a *user message*. It should be appended to the *default message* to form the version's commit message.
 
-### Komendy
-#### init
-Inicjalizuje system gvt w bieżącym katalogu, oraz ustawia aktywną i ostanią wersję na 0. Wiadomość do wersji 0: `GVT initialized.`
+## Commands
 
-- Jeżeli katalog już był zainicjowany, należy wypisać na *System.out*: `Current directory is already initialized.`, oraz zwrócić kod błędu 10.
-- Jeżeli inicjalizaja się udała, należy wypisać na *System.out*: `Current directory initialized successfully.`.
+### init
+Initializes the GVT system in the current directory and sets both the active and latest version to 0. Commit message for version 0: `GVT initialized.`
 
-Przy inicjacji, Gvt powinien utworzyć katalog o nazwie `.gvt`. Wewnątrz tego katalogu system może przechowywać wszystkie dane niezbędne do jego działania.
+- If the directory is already initialized, print to *System.out*: `Current directory is already initialized.`, and return error code `10`.
+- If initialization succeeds, print to *System.out*: `Current directory initialized successfully.`
+- The initialization should create a `.gvt` directory where all necessary system data is stored.
 
-#### add
-Dodaje do ostatniej wersji plik wskazany jako parametry do tej komendy. Przyjmuje też opcjonalną wiadmość użytkownika (opisane w zasadach ogólnych).
+### add
+Adds a specified file to the latest version. Also supports an optional user message (see general rules).
 
-Jeśli nie wskazano pliku, należy wypisac na *System.out*: `Please specify file to add.`, oraz zwrócić kod błędu 20.
+- If no file is specified, print to *System.out*: `Please specify file to add.`, and return error code `20`.
+- If the file exists:
+  - On success: Print `File added successfully. File: {file-name}` and create a new version.
+  - If the file is already added: Print `File already added. File: {file-name}`.
+- If the file does not exist: Print `File not found. File: {file-name}`, and return error code `21`.
+- If any other error occurs: Print `File cannot be added. See ERR for details. File: {file-name}`, log the stack trace to *System.err*, and return error code `22`.
 
-Jeśli wskazano plik, to należy:
-- w razie powodzenia wypisać na *System.out*: `File added successfully. File: {file-name}` oraz utworzyć nową wersję.
-- jeśli plik nie istnieje wypisać na *System.out*: `File not found. File: {file-name}`, oraz zwrócić kod błędu 21.
-- jeśli plik jest już dodany, należy wypisać na *System.out*: `File already added. File: {file-name}`
-- jeśli wystąpił jakikolwiek inny błąd, należy wypisać *System.out*: `File cannot be added. See ERR for details. File: {file-name}`, wypisać na *System.err* stack trace, oraz zwrócić kod błędu 22.
+Default message: `File added successfully. File: {file-name}`.
 
-Domyslna wiadomość: `File added successfully. File: {file-name}`. 
+### detach
+Removes a file from the latest version without deleting it from the file system. Also supports an optional user message.
 
-#### detach
-Odłącza od ostatniej wersji (ale nie usuwa z systemu plików!) plik wskazany jako parametr do komendy. Przyjmuje też opcjonalną wiadmość użytkownika (opisane w zasadach ogólnych).
+- If no file is specified, print to *System.out*: `Please specify file to detach.`, and return error code `30`.
+- If the file exists:
+  - On success: Print `File detached successfully. File: {file-name}` and create a new version.
+  - If the file is not in GVT: Print `File is not added to GVT. File: {file-name}`.
+- If any other error occurs: Print `File cannot be detached. See ERR for details. File: {file-name}`, log the stack trace to *System.err*, and return error code `31`.
 
-Jeśli nie wskazano pliku, należy wypisać na *System.out*: `Please specify file to detach.`, oraz zwrócić kod błędu 30.
+Default message: `File detached successfully. File: {file-name}`.
 
-Jeśli wskazano plik, to należy:
-- w razie powodzenia wypisać na *System.out*: `File detached successfully. File: {file-name}`, oraz utworzyć nową wersję.
-- jeśli plik nie jest dodany do gvt, należy wypisac na *System.out*: `File is not added to gvt. File: {file-name}`
-- jeśli wystąpił jakikolwiek inny błąd, należy wypisać *System.out*: `File cannot be detached, see ERR for details. File: {file-name}`, wypisać na *System.err* stack trace, oraz zwrócić kod błędu 31.
+### checkout
+Restores files to the state of a specified version. This does not affect GVT tracking; for example, if a file was tracked in the restored version but not in the latest version, it should be restored but not re-tracked.
 
-Domyslna wiadomość: `File detached successfully. File: {file-name}`. 
+- Takes 1 parameter: the version number to restore.
+- If the version number is invalid (non-existent or not a number), print to *System.out*: `Invalid version number: {specified-version}`, and return error code `60`.
+- On success: Restore all files to the specified version and print `Checkout successful for version: {specified-version}`.
+- In case of other errors, follow general rules.
 
-#### checkout
-Przywraca pliki do stanu z konkretnej, wskazanej w parametrze, wersji.
+### commit
+Creates a new version in GVT with the specified file. Also supports an optional user message.
 
-Komenda nie zmienia stanu kontrolowania plików przez GVT. Np: jeśli plik był kontrolowany w przywracanej wersji, a nie jest kontrolowany w ostatniej wersji, to NIE nalezy go dodawać do GVT, tylko przywrócić jego zawartość (lub odtworzyć, jeśli był w międzyczasie usunięty). Pliki, które w obu wersjach nie są kontrolowane, pozostają niezmienione.
+- If no file is specified, print to *System.out*: `Please specify file to commit.`, and return error code `50`.
+- If the file exists:
+  - If it was added and still exists, create a new version and print `File committed successfully. File: {file-name}`.
+  - If it was not added, print `File is not added to GVT. File: {file-name}`.
+- If the file does not exist, print `File not found. File: {file-name}`, and return error code `51`.
+- If any other error occurs: Print `File cannot be committed. See ERR for details. File: {file-name}`, log the stack trace to *System.err*, and return error code `52`.
 
-Przyjmuje 1 parametr: numer wersji do przywrócenia.
+Default message: `File committed successfully. File: {file-name}`.
 
-- jeśli podana wersja jest nieprawidłowa (nie istnieje, albo nie jest to liczba) należy wypisać na *System.out*: `Invalid version number: {specified-version}`, oraz zwrócić kod błędu 60.
-- jeśli podana wersja jest prawidłowa, należy przywrócić stan wszystkich plików do stanu z podanej wersji, oraz wypisać na *System.out*: `Checkout successful for version: {specified-version}`
-- w razie innych błędów, należy zastosować zasady ogólne.
+### history
+Displays version history.
 
-#### commit
-Tworzy nową wersję w GVT z plikem podanym jako parametr. Przyjmuje też opcjonalną wiadmość użytkownika (opisane w zasadach ogólnych).
+Format: `{version-number}: {commit message}` (each version appears on a new line). If the commit message is multi-line, only the first line is displayed.
 
-Jeśli nie wskazano pliku, należy wypisać na *System.out*: `Please specify file to commit.`, oraz zwrócić kod błędu 50.
+- If no parameters are specified, all versions are displayed.
+- The `-last {n}` parameter displays the last `n` versions.
+- Invalid parameters are ignored and treated as missing.
 
-Jeżeli wskazano plik, to należy:
-- jeśli plik był dodany i nadal istnieje, należy utworzyć nową wersję, oraz wypisać na *System.out*: `File committed successfully. File: {file-name}`.
-- jeśli plik nie był dodany, należy wypisać na *System.out*: `File is not added to gvt. File: {file-name}`
-- jeśli plik nie istnieje, należy wypisać na *System.out*: `File not found. File: {file-name}`, oraz zwrócić kod błędu 51.
-- jeśli wystąpił jakikolwiek inny błąd, należy wypisać *System.out*: `File cannot be committed, see ERR for details. File: {file-name}`, wypisać na *System.err* stack trace, oraz zwrócić kod 52.
+### version
+Displays details of a specific version.
 
-Domyślna wiadomość: `File committed successfully. File: {file-name}`.
+- If no parameter is provided, it displays the currently active version.
+- If the version number is invalid (non-existent or not a number), print to *System.out*: `Invalid version number: {specified-number}.`, and return error code `60`.
 
-#### history
-Wyświetla historię wersji. 
-
-Format:`{numer-wersji}: {commit message}`. Każda wersja jest wyświetlana w nowej linii. Jeśli wiadomość (commit message) jest wieloliniowa, należy wyświetlić tylko pierwszą linię.
-
-- jeśli nie wyspecyfikowano parametrów, to wyświetlane są wszystkie wersje.
-- paramter `-last {n}`: wyświetla ostatnie n wersji.
-- błędne parametry są ignorowane, i traktowane jako brak parametrów.
-
-#### version
-Wyświetla detalie wersji, o numerze podanym jako paramter.
-
-- jeśli nie podano parametru, wyświetla aktualnie aktywną wersję.
-- jeśli podana wersja jest nieprawidłowa (nie istnieje, albo nie jest to liczba) należy wypisać na *System.out*: `Invalid version number: {specified-number}.`, oraz zwrócić kod błędu 60.
-
-Format: 
+Format:
 ```
-Version: {numer-wersji}
+Version: {version-number}
 {commit message}
 ```
