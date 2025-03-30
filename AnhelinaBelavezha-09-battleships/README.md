@@ -1,61 +1,61 @@
-## Gra w okręty
+## Battleship Game
 
-Należy napisać aplikację do gry w okręty przez sieć.
+Create an application for playing Battleship over the network.
 
-Aplikacja łączy się z inną aplikacją i rozgrywa partię gry w okręty.
+The application connects to another application and plays a game of Battleship.
 
-### Parametry uruchomieniowe
-Aplikacja obługuje następujące parametry:
-* `-mode [server|client]` - wskazuje tryb działania (jako serwer: przyjmuje połączenie, jako klient: nawiązuje połączenie z serwerem)
-* `-port N` - port, na którym aplikacja ma się komunikować.
-* `-map map-file` - ścieżka do pliku zawierającego mapę z rozmieszczeniem statków (format opisany w sekcji Mapa).
+### Command-Line Parameters
+The application supports the following parameters:
+* `-mode [server|client]` - specifies the mode of operation (as a server: accepts a connection, as a client: connects to a server)
+* `-port N` - the port on which the application communicates.
+* `-map map-file` - the path to the file containing the map with ship placements (format described in the Map section).
 
-### Mapa
-* Mapa jest dokładnie taka sama jak w zadaniu nr 3 z zestawu 03-collections. Należy użyć uprzednio napisanego generatora do tworzenia losowych map.
+### Map
+* The map is exactly the same as in task 3 from set 03-collections. You must use the previously written generator to create random maps.
 
-### Protokół komunikacji
-* Komunikacja odbywa się z użyciem protokołu TCP, z kodowaniem UTF-8.
-* Klient i serwer wysyłają sobie na przemian _wiadomość_, która składa się z 2 części: _komendy_ i _współrzędnych_, odzielonych znakiem `;`, i zakończonych znakiem końca linii `\n`.
-  * Format wiadomości: `komenda;współrzędne\n`
-  * Przykład wiadomości: `pudło;D6\n`
-* Komendy i ich znaczenie:
+### Communication Protocol
+* Communication occurs using the TCP protocol, with UTF-8 encoding.
+* The client and server alternately send each other a _message_, consisting of 2 parts: _command_ and _coordinates_, separated by the `;` character, and terminated by a newline `\n`.
+  * Message format: `command;coordinates\n`
+  * Example message: `miss;D6\n`
+* Commands and their meanings:
   * _start_
-    * komenda inicjująca rozgrywkę. 
-    * Wysyła ją klient tylko raz, na początku.
-    * Przykład: `start;A1\n`
-  * _pudło_
-    * odpowiedź wysyłana, gdy pod współrzędnymi otrzymanymi od drugiej strony nie znajduje się żaden okręt.
-    * Przykład: `pudło;A1\n`
-  * _trafiony_
-    * odpowiedź wysyłana, gdy pod współrzędnymi otrzymanymi od drugiej strony znajduje się okręt, i nie jest to jego ostatni dotychczas nie trafiony segment.
-    * Przykład: `trafiony;A1\n`
-  * _trafiony zatopiony_
-    * odpowiedź wysyłana, gdy pod współrzędnymi otrzymanymi od drugiej strony znajduje się okręt, i trafiono ostatni jeszcze nie trafiony segment tego okrętu.
-    * Przykład: `trafiony zatopiony;A1\n`
-  * _ostatni zatopiony_
-    * odpowiedź wysyłana, gdy pod współrzędnymi otrzymanymi od drugiej strony znajduje się okręt, i trafiono ostatni jeszcze nie trafiony segment okrętu całej floty w tej grze.
-    * Jest to ostatnia komenda w grze. Strona wysyłająca ją przegrywa.
-    * Przy tej komendzie nie podaje się współrzędnych strzału (już nie ma kto strzelać!). 
-    * Przykład: `ostatni zatopiony\n`
-* Możliwe (choć strategicznie nierozsądne) jest wielokrotne strzelanie w to samo miejsce. Należy wtedy odpowiadać zgodnie z aktualnym stanem planszy:
-  * `pudło` w razie pudła,
-  * `trafiony` gdy okręt już był trafiony w to miejsce, ale nie jest jeszcze zatopiony,
-  * `trafiony zatopiony` gdy okręt jest już zatopiony.
-* Obsługa błędów:
-  * W razie otrzymania niezrozumiałej komendy lub po 1 sekundzie oczekiwania należy ponownie wysłać swoją ostatnią wiadomość. 
-  * Po 3 nieudanej próbie należy wyświelić komunikat `Błąd komunikacji` i zakończyć działanie aplikacji.
+    * Command to initiate the game.
+    * Sent by the client only once, at the beginning.
+    * Example: `start;A1\n`
+  * _miss_
+    * Response sent when no ship is located at the coordinates received from the other side.
+    * Example: `miss;A1\n`
+  * _hit_
+    * Response sent when a ship is located at the coordinates received from the other side, and it is not the last remaining unhit segment of the ship.
+    * Example: `hit;A1\n`
+  * _hit sunk_
+    * Response sent when a ship is located at the coordinates received from the other side, and the last remaining unhit segment of that ship has been hit.
+    * Example: `hit sunk;A1\n`
+  * _last sunk_
+    * Response sent when a ship is located at the coordinates received from the other side, and the last remaining unhit segment of the entire fleet has been sunk.
+    * This is the last command in the game. The side sending it loses.
+    * No coordinates are provided with this command (there is no one left to shoot!).
+    * Example: `last sunk\n`
+* It is possible (though strategically unwise) to shoot multiple times at the same location. In this case, respond according to the current state of the board:
+  * `miss` for a miss,
+  * `hit` if the ship was already hit at this location but is not yet sunk,
+  * `hit sunk` if the ship is already sunk.
+* Error handling:
+  * If an unrecognized command is received or if 1 second passes without a response, resend the last message.
+  * After 3 failed attempts, display the message `Communication Error` and terminate the application.
 
-### Działanie aplikacji
-* Po uruchomieniu (w dowolnym trybie), aplikacja powinna wyświetlić swoją mapę.
-* W czasie działania aplikacja powinna wyświetlać wszystkie wysyłane i otrzymywane wiadomości.
-* Po zakończeniu rozgrywki, aplikacja powinna wyświetlić:
-  * `Wygrana\n` w razie wygranej lub `Przegrana\n` w razie przegranej,
-  * W razie wygranej: pełną mapę przeciwnika,
-  * W razie przegranej: mapę przeciwnika, z zastąpieniem nieznanych pól znakiem `?`. _Uwaga_: pola sąsiadujące z zatopionym okrętem należy uznać za odkryte (nie może się na nich znajdować inny okręt).
-  * Pusty wiersz
-  * Swoją mapę, z dodatkowymi oznaczeniami: `~` - pudła przeciwnika, `@` - celne strzały przeciwnika.
+### Application Behavior
+* After launching (in any mode), the application should display its map.
+* During the game, the application should display all sent and received messages.
+* After the game ends, the application should display:
+  * `Victory\n` in case of a win or `Loss\n` in case of a loss,
+  * In case of victory: the opponent's full map,
+  * In case of a loss: the opponent's map, replacing unknown fields with `?`. _Note_: fields adjacent to a sunk ship should be considered discovered (no other ship can occupy those fields).
+  * An empty line.
+  * Your own map, with additional markings: `~` for misses by the opponent, `@` for successful hits by the opponent.
 
-Przykład mapy przeciwnika z przegranej sesji:
+Example of the opponent's map from a lost session:
 ```
 ..#..??.?.
 #.????.#..
@@ -69,7 +69,7 @@ Przykład mapy przeciwnika z przegranej sesji:
 .......#..
 ```
 
-Przykład swojej mapy po grze (wygranej; nie wszytkie okręty zatopione):
+Example of your map after the game (won; not all ships sunk):
 ```
 ~~@~~.~~~.
 @..~.~.@.~
@@ -83,7 +83,8 @@ Przykład swojej mapy po grze (wygranej; nie wszytkie okręty zatopione):
 ..~.~.~~~.
 ```
 
-### Zasady zaliczenia:
-Zadanie nie ma testów automatycznych, ani nawet określonej struktury projektu (należy ją zrobić samemu).
+### Grading Rules:
+This task does not have automated tests or a predefined project structure (you need to create it yourself).
 
-Zaliczenie będzie polegało na rozegraniu kilku partii pomiędzy uczestnikami zajęć na następnym laboratorium.
+Grading will involve playing several rounds between participants during the next lab session.
+
